@@ -53,18 +53,21 @@ impl PosePublisher {
             z: q[2],
             w: q[3],
         };
-        let mut odometry = Odometry {
+        let odometry = Odometry {
             header: header.clone(),
             child_frame_id: self.camera_frame.clone(),
-            ..Default::default()
-        };
-        odometry.pose.pose = Pose {
-            position: Point {
-                x: t[0],
-                y: t[1],
-                z: t[2],
+            pose: ros_env::geometry_msgs::msg::PoseWithCovariance {
+                pose: Pose {
+                    position: Point {
+                        x: t[0],
+                        y: t[1],
+                        z: t[2],
+                    },
+                    orientation: rotation.clone(),
+                },
+                ..Default::default()
             },
-            orientation: rotation.clone(),
+            ..Default::default()
         };
         self.odometry.publish(odometry)?;
         let Some(tf) = &self.tf else {
