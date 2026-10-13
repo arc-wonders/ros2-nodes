@@ -18,6 +18,7 @@ import numpy as np
 import rosbag2_py
 import yaml
 from builtin_interfaces.msg import Time
+from kornia_rs.image import Image as KorniaImage
 from rclpy.serialization import serialize_message
 from sensor_msgs.msg import CameraInfo, Image, Imu
 
@@ -116,10 +117,10 @@ def main():
             writer.write("/imu0", serialize_message(msg), t)
             continue
         for cam in ("cam0", "cam1"):
-            raw = cv2.imread(f"{mav}/{cam}/data/{t}.png", cv2.IMREAD_GRAYSCALE)
+            raw = KorniaImage.open(f"{mav}/{cam}/data/{t}.png", mode="L")
             img = Image()
             img.header.stamp, img.header.frame_id = stamp(t), cam
-            img.height, img.width = raw.shape
+            img.height, img.width = raw.height, raw.width
             img.encoding, img.step, img.data = "mono8", img.width, raw.tobytes()
             writer.write(f"/{cam}/image_raw", serialize_message(img), t)
             info = infos[cam]
